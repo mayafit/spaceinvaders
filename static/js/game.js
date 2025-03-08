@@ -368,19 +368,39 @@ function startGame() {
 
 async function loadHighScores() {
     try {
+        if (!window.dbAvailable) {
+            // In offline mode
+            const highScoresList = document.getElementById('highScores');
+            highScoresList.innerHTML = '<li class="list-group-item">Offline mode - High scores unavailable</li>';
+            return;
+        }
+
         const response = await fetch('/api/scores');
+        if (!response.ok) {
+            throw new Error('Failed to load high scores');
+        }
         const scores = await response.json();
+
         const highScoresList = document.getElementById('highScores');
-        highScoresList.innerHTML = scores
-            .map(score => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${score.player_name}</span>
-                    <span class="badge bg-primary rounded-pill">${score.score}</span>
-                </li>
-            `)
-            .join('');
+        highScoresList.innerHTML = '';
+
+        if (scores.length === 0) {
+            highScoresList.innerHTML = '<li class="list-group-item">No high scores yet</li>';
+            return;
+        }
+
+        scores.forEach((score, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.innerHTML = `<span class="text-info">#${index + 1}</span> ${score.player_name}: <span class="text-warning">${score.score}</span>`;
+            highScoresList.appendChild(li);
+        });
     } catch (error) {
         console.error('Error loading high scores:', error);
+        // If we get an error loading scores, we might have lost database connection
+        window.dbAvailable = false;
+        const highScoresList = document.getElementById('highScores');
+        highScoresList.innerHTML = '<li class="list-group-item">Offline mode - High scores unavailable</li>';
     }
 }
 
@@ -416,6 +436,7 @@ async function saveScore() {
 
 // Add sound toggle functionality
 window.soundEnabled = true;
+window.dbAvailable = true; // Initialize database availability flag
 
 function toggleSound() {
     window.soundEnabled = !window.soundEnabled;
