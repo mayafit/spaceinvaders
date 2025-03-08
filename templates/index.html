@@ -51,19 +51,17 @@
                     <p>Final Score: <span id="finalScore">0</span></p>
                     <div class="mb-3">
                         <input type="text" id="playerName" class="form-control mb-2" placeholder="Enter your name">
-                        <button class="btn btn-secondary me-2" onclick="saveScore()">Save Score</button>
+                        <button id="saveScoreBtn" class="btn btn-secondary me-2" onclick="saveScore()">Save Score</button>
                         <button class="btn btn-secondary" onclick="showShipSelection()">Play Again</button>
                     </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0">High Scores</h3>
-                    </div>
-                    <div class="card-body">
-                        <ul id="highScores" class="list-group list-group-flush">
-                        </ul>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3 class="card-title mb-0">High Scores</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul id="highScores" class="list-group list-group-flush">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -385,6 +385,7 @@ async function loadHighScores() {
 }
 
 async function saveScore() {
+    const saveButton = document.getElementById('saveScoreBtn');
     const playerName = document.getElementById('playerName').value || 'Anonymous';
     const score = window.game.score;
 
@@ -398,18 +399,18 @@ async function saveScore() {
         });
 
         if (!response.ok) {
-            const data = await response.json();
-            if (response.status === 400 && data.error === 'Duplicate score submission') {
-                alert('Score already saved!');
-                return;
-            }
             throw new Error('Failed to save score');
         }
+
+        // Disable the save button and update its text
+        saveButton.disabled = true;
+        saveButton.innerHTML = 'Score Saved ✓';
+        saveButton.classList.remove('btn-secondary');
+        saveButton.classList.add('btn-success');
 
         await loadHighScores();
     } catch (error) {
         console.error('Error saving score:', error);
-        alert('Error saving score. Please try again.');
     }
 }
 
