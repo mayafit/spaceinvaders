@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center mt-4">
+            <div class="col-12 text-center">
+                <h1>Space Invaders</h1>
+                <div class="score-container mb-3">
+                    <span>Score: </span><span id="score">0</span>
+                </div>
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div id="gameOver" class="game-over d-none">
+                    <h2>Game Over</h2>
+                    <p>Final Score: <span id="finalScore">0</span></p>
+                    <button class="btn btn-secondary" onclick="startGame()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>

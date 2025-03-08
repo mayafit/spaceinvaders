@@ -1,0 +1,21 @@
+canvas {
+    border: 2px solid var(--bs-secondary);
+    background-color: #000;
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border-radius: 10px;
+    border: 2px solid var(--bs-secondary);
+}
+
+.score-container {
+    font-size: 1.5rem;
+    color: var(--bs-info);
+}
