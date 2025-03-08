@@ -38,12 +38,13 @@
                     </div>
                 </div>
 
-                <div class="score-container mb-3">
-                    <span>Score: </span><span id="score">0</span>
+                <div class="game-info mb-3">
+                    <span class="me-4">Level: <span id="level">1</span></span>
+                    <span>Score: <span id="score">0</span></span>
                 </div>
                 <canvas id="gameCanvas" width="800" height="600" class="d-none"></canvas>
                 <div id="gameOver" class="game-over d-none">
-                    <h2>Game Over</h2>
+                    <h2 id="gameOverMessage">Game Over</h2>
                     <p>Final Score: <span id="finalScore">0</span></p>
                     <div class="mb-3">
                         <input type="text" id="playerName" class="form-control mb-2" placeholder="Enter your name">

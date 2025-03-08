@@ -3,6 +3,7 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.score = 0;
+        this.level = 1;
         this.gameOver = false;
         this.shipType = shipType;
 
@@ -33,8 +34,23 @@ class Game {
         this.playerImg = new Image();
         this.playerImg.src = `/static/svg/${shipType}.svg`;
 
-        this.alienImg = new Image();
-        this.alienImg.src = '/static/svg/alien.svg';
+        this.alienImgs = {
+            normal: (() => {
+                const img = new Image();
+                img.src = '/static/svg/alien.svg';
+                return img;
+            })(),
+            fast: (() => {
+                const img = new Image();
+                img.src = '/static/svg/alien_fast.svg';
+                return img;
+            })(),
+            boss: (() => {
+                const img = new Image();
+                img.src = '/static/svg/alien_boss.svg';
+                return img;
+            })()
+        };
 
         // Setup sound
         this.synth = new Tone.Synth().toDestination();
@@ -69,15 +85,45 @@ class Game {
     }
 
     createAliens() {
-        for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 10; col++) {
+        this.aliens = [];
+        const levelConfig = {
+            1: { rows: 3, cols: 8, types: ['normal'], speed: 1 },
+            2: { rows: 4, cols: 8, types: ['normal', 'fast'], speed: 1.2 },
+            3: { rows: 4, cols: 9, types: ['normal', 'fast'], speed: 1.4, boss: true },
+            4: { rows: 5, cols: 9, types: ['normal', 'fast'], speed: 1.6, boss: true },
+            5: { rows: 5, cols: 10, types: ['fast'], speed: 1.8, boss: true }
+        };
+
+        const config = levelConfig[this.level] || levelConfig[5];
+        this.alienMoveInterval = 1000 / config.speed;
+
+        // Create regular aliens
+        for (let row = 0; row < config.rows; row++) {
+            for (let col = 0; col < config.cols; col++) {
+                const type = config.types[Math.floor(Math.random() * config.types.length)];
                 this.aliens.push({
                     x: col * 50 + 50,
                     y: row * 50 + 50,
-                    width: 30,
-                    height: 30
+                    width: type === 'fast' ? 30 : 30,
+                    height: type === 'fast' ? 20 : 30,
+                    type: type,
+                    health: type === 'fast' ? 1 : 1,
+                    speed: type === 'fast' ? 2 : 1
                 });
             }
+        }
+
+        // Add boss if configured for this level
+        if (config.boss) {
+            this.aliens.push({
+                x: this.canvas.width / 2 - 25,
+                y: 20,
+                width: 50,
+                height: 50,
+                type: 'boss',
+                health: 5,
+                speed: 0.5
+            });
         }
     }
 
@@ -99,7 +145,7 @@ class Game {
         let touchedEdge = false;
 
         this.aliens.forEach(alien => {
-            alien.x += 30 * this.alienDirection;
+            alien.x += 30 * this.alienDirection * alien.speed;
 
             if (alien.x <= 0 || alien.x + alien.width >= this.canvas.width) {
                 touchedEdge = true;
@@ -123,15 +169,31 @@ class Game {
             this.aliens.forEach((alien, alienIndex) => {
                 if (this.checkCollision(bullet, alien)) {
                     this.bullets.splice(bulletIndex, 1);
-                    this.aliens.splice(alienIndex, 1);
-                    this.score += 100;
-                    document.getElementById('score').textContent = this.score;
 
-                    // Play explosion sound
-                    this.synth.triggerAttackRelease('G2', '0.1');
+                    alien.health--;
+                    if (alien.health <= 0) {
+                        this.aliens.splice(alienIndex, 1);
+                        this.score += alien.type === 'boss' ? 500 : 
+                                    alien.type === 'fast' ? 200 : 100;
+                        document.getElementById('score').textContent = this.score;
+
+                        // Play explosion sound
+                        this.synth.triggerAttackRelease('G2', '0.1');
+                    }
                 }
             });
         });
+
+        // Check if level is complete
+        if (this.aliens.length === 0) {
+            if (this.level < 5) {
+                this.level++;
+                document.getElementById('level').textContent = this.level;
+                this.createAliens();
+            } else {
+                this.endGame(true);
+            }
+        }
     }
 
     checkCollision(rect1, rect2) {
@@ -168,10 +230,6 @@ class Game {
         }
 
         this.checkCollisions();
-
-        if (this.aliens.length === 0) {
-            this.endGame(true);
-        }
     }
 
     draw() {
@@ -188,7 +246,8 @@ class Game {
 
         // Draw aliens
         this.aliens.forEach(alien => {
-            this.ctx.drawImage(this.alienImg, alien.x, alien.y, alien.width, alien.height);
+            const img = this.alienImgs[alien.type];
+            this.ctx.drawImage(img, alien.x, alien.y, alien.width, alien.height);
         });
     }
 
@@ -197,6 +256,10 @@ class Game {
         document.getElementById('finalScore').textContent = this.score;
         document.getElementById('gameOver').classList.remove('d-none');
         document.getElementById('gameCanvas').classList.add('d-none');
+
+        const message = won ? 'Congratulations! You completed all levels!' : 'Game Over';
+        document.getElementById('gameOverMessage').textContent = message;
+
         loadHighScores();
     }
 
@@ -228,6 +291,7 @@ function showShipSelection() {
     document.getElementById('gameOver').classList.add('d-none');
     document.getElementById('gameCanvas').classList.add('d-none');
     document.getElementById('score').textContent = '0';
+    document.getElementById('level').textContent = '1'; //Added to initialize level display
 }
 
 function startGame() {
@@ -237,6 +301,7 @@ function startGame() {
     document.getElementById('gameOver').classList.add('d-none');
     document.getElementById('gameCanvas').classList.remove('d-none');
     document.getElementById('score').textContent = '0';
+    document.getElementById('level').textContent = '1'; //Added to initialize level display
 
     window.game = new Game(selectedShip);
     window.game.gameLoop();
