@@ -12,17 +12,43 @@
         <div class="row justify-content-center mt-4">
             <div class="col-12 col-md-8 text-center">
                 <h1>Space Invaders</h1>
+
+                <!-- Ship Selection Screen -->
+                <div id="shipSelection" class="ship-selection mb-4">
+                    <h2>Select Your Ship</h2>
+                    <div class="row justify-content-center">
+                        <div class="col-4">
+                            <div class="ship-option" onclick="selectShip('ship1')">
+                                <img src="{{ url_for('static', filename='svg/ship1.svg') }}" alt="Ship 1">
+                                <p>Classic Ship</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="ship-option" onclick="selectShip('ship2')">
+                                <img src="{{ url_for('static', filename='svg/ship2.svg') }}" alt="Ship 2">
+                                <p>Speed Ship</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="ship-option" onclick="selectShip('ship3')">
+                                <img src="{{ url_for('static', filename='svg/ship3.svg') }}" alt="Ship 3">
+                                <p>Power Ship</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="score-container mb-3">
                     <span>Score: </span><span id="score">0</span>
                 </div>
-                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <canvas id="gameCanvas" width="800" height="600" class="d-none"></canvas>
                 <div id="gameOver" class="game-over d-none">
                     <h2>Game Over</h2>
                     <p>Final Score: <span id="finalScore">0</span></p>
                     <div class="mb-3">
                         <input type="text" id="playerName" class="form-control mb-2" placeholder="Enter your name">
                         <button class="btn btn-secondary me-2" onclick="saveScore()">Save Score</button>
-                        <button class="btn btn-secondary" onclick="startGame()">Play Again</button>
+                        <button class="btn btn-secondary" onclick="showShipSelection()">Play Again</button>
                     </div>
                 </div>
             </div>

@@ -1,17 +1,25 @@
 class Game {
-    constructor() {
+    constructor(shipType) {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.score = 0;
         this.gameOver = false;
+        this.shipType = shipType;
+
+        // Ship characteristics
+        const shipStats = {
+            ship1: { speed: 5, width: 40, height: 40 },
+            ship2: { speed: 7, width: 35, height: 40 },
+            ship3: { speed: 4, width: 45, height: 40 }
+        };
 
         // Game objects
         this.player = {
             x: this.canvas.width / 2,
             y: this.canvas.height - 50,
-            width: 40,
-            height: 40,
-            speed: 5
+            width: shipStats[shipType].width,
+            height: shipStats[shipType].height,
+            speed: shipStats[shipType].speed
         };
 
         this.bullets = [];
@@ -23,7 +31,7 @@ class Game {
 
         // Load images
         this.playerImg = new Image();
-        this.playerImg.src = '/static/svg/player.svg';
+        this.playerImg.src = `/static/svg/${shipType}.svg`;
 
         this.alienImg = new Image();
         this.alienImg.src = '/static/svg/alien.svg';
@@ -188,7 +196,8 @@ class Game {
         this.gameOver = true;
         document.getElementById('finalScore').textContent = this.score;
         document.getElementById('gameOver').classList.remove('d-none');
-        loadHighScores(); // Load high scores when game ends
+        document.getElementById('gameCanvas').classList.add('d-none');
+        loadHighScores();
     }
 
     gameLoop() {
@@ -198,10 +207,38 @@ class Game {
     }
 }
 
-function startGame() {
+let selectedShip = null;
+
+function selectShip(shipType) {
+    // Remove selection from all ships
+    document.querySelectorAll('.ship-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+
+    // Add selection to clicked ship
+    const selectedOption = document.querySelector(`.ship-option[onclick="selectShip('${shipType}')"]`);
+    selectedOption.classList.add('selected');
+
+    selectedShip = shipType;
+    startGame();
+}
+
+function showShipSelection() {
+    document.getElementById('shipSelection').classList.remove('d-none');
     document.getElementById('gameOver').classList.add('d-none');
+    document.getElementById('gameCanvas').classList.add('d-none');
     document.getElementById('score').textContent = '0';
-    window.game = new Game();
+}
+
+function startGame() {
+    if (!selectedShip) return;
+
+    document.getElementById('shipSelection').classList.add('d-none');
+    document.getElementById('gameOver').classList.add('d-none');
+    document.getElementById('gameCanvas').classList.remove('d-none');
+    document.getElementById('score').textContent = '0';
+
+    window.game = new Game(selectedShip);
     window.game.gameLoop();
 }
 
@@ -241,5 +278,7 @@ async function saveScore() {
     }
 }
 
-window.addEventListener('load', loadHighScores);
-window.addEventListener('load', startGame);
+window.addEventListener('load', () => {
+    loadHighScores();
+    showShipSelection();
+});

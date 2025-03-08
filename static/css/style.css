@@ -29,3 +29,32 @@ canvas {
     background-color: var(--bs-dark);
     border-color: var(--bs-secondary);
 }
+
+.ship-selection {
+    margin-bottom: 2rem;
+}
+
+.ship-option {
+    cursor: pointer;
+    padding: 1rem;
+    border: 2px solid var(--bs-secondary);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.ship-option:hover {
+    border-color: var(--bs-primary);
+    transform: translateY(-5px);
+}
+
+.ship-option img {
+    width: 100%;
+    max-width: 100px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.ship-option.selected {
+    border-color: var(--bs-success);
+    background-color: rgba(var(--bs-success-rgb), 0.1);
+}
