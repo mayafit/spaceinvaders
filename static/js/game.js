@@ -103,11 +103,11 @@ class Game {
     updateBombs() {
         const currentTime = Date.now();
         // Bomb frequency increases with level (shorter interval)
-        const adjustedBombInterval = this.bombInterval / (1 + (this.level * 0.2));
+        const adjustedBombInterval = this.bombInterval / (1 + (this.level * 0.1)); // Reduced level scaling
 
         if (currentTime - this.lastBombTime > adjustedBombInterval) {
-            const shootingAliens = this.aliens.filter(alien => 
-                Math.random() < (0.1 + (this.level * 0.02)) // Increased chance with level
+            const shootingAliens = this.aliens.filter(alien =>
+                Math.random() < (0.02 + (this.level * 0.02)) // Much lower base chance, increases with level
             );
             shootingAliens.forEach(alien => this.dropBomb(alien));
             this.lastBombTime = currentTime;
@@ -163,7 +163,7 @@ class Game {
                     if (alien.health <= 0) {
                         this.aliens.splice(alienIndex, 1);
                         this.score += alien.type === 'boss' ? 500 :
-                                    alien.type === 'fast' ? 200 : 100;
+                            alien.type === 'fast' ? 200 : 100;
                         document.getElementById('score').textContent = this.score;
 
                         // Play explosion sound
@@ -187,9 +187,9 @@ class Game {
 
     checkCollision(rect1, rect2) {
         return rect1.x < rect2.x + rect2.width &&
-               rect1.x + rect1.width > rect2.x &&
-               rect1.y < rect2.y + rect2.height &&
-               rect1.y + rect1.height > rect2.y;
+            rect1.x + rect1.width > rect2.x &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.y + rect1.height > rect2.y;
     }
 
     update() {
@@ -389,16 +389,27 @@ async function saveScore() {
     const score = window.game.score;
 
     try {
-        await fetch('/api/scores', {
+        const response = await fetch('/api/scores', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ player_name: playerName, score: score })
         });
+
+        if (!response.ok) {
+            const data = await response.json();
+            if (response.status === 400 && data.error === 'Duplicate score submission') {
+                alert('Score already saved!');
+                return;
+            }
+            throw new Error('Failed to save score');
+        }
+
         await loadHighScores();
     } catch (error) {
         console.error('Error saving score:', error);
+        alert('Error saving score. Please try again.');
     }
 }
 

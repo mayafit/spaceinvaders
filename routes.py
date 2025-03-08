@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from app import app, db
 from models import HighScore
+from datetime import datetime, timedelta
 
 @app.route('/')
 def index():
@@ -15,9 +16,23 @@ def get_high_scores():
 @app.route('/api/scores', methods=['POST'])
 def save_score():
     data = request.get_json()
+    player_name = data.get('player_name', 'Anonymous')
+    score = data.get('score', 0)
+
+    # Check for recent duplicate submissions (within last minute)
+    recent_duplicate = HighScore.query.filter_by(
+        player_name=player_name,
+        score=score
+    ).filter(
+        HighScore.created_at >= datetime.utcnow() - timedelta(minutes=1)
+    ).first()
+
+    if recent_duplicate:
+        return jsonify({'error': 'Duplicate score submission'}), 400
+
     new_score = HighScore(
-        player_name=data.get('player_name', 'Anonymous'),
-        score=data.get('score', 0)
+        player_name=player_name,
+        score=score
     )
     db.session.add(new_score)
     db.session.commit()
