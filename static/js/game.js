@@ -24,11 +24,14 @@ class Game {
         };
 
         this.bullets = [];
+        this.bombs = [];  // Array to store enemy bombs
         this.aliens = [];
         this.alienDirection = 1;
         this.alienStepDown = 30;
         this.alienMoveInterval = 1000;
         this.lastAlienMove = 0;
+        this.lastBombTime = 0;
+        this.bombInterval = 2000; // Base interval between bomb drops
 
         // Load images
         this.playerImg = new Image();
@@ -85,6 +88,46 @@ class Game {
 
         // Play shoot sound
         this.playSound('C4', '0.1');
+    }
+
+    dropBomb(alien) {
+        this.bombs.push({
+            x: alien.x + alien.width / 2,
+            y: alien.y + alien.height,
+            width: 4,
+            height: 8,
+            speed: 5 + this.level // Bombs get faster with each level
+        });
+    }
+
+    updateBombs() {
+        const currentTime = Date.now();
+        // Bomb frequency increases with level (shorter interval)
+        const adjustedBombInterval = this.bombInterval / (1 + (this.level * 0.2));
+
+        if (currentTime - this.lastBombTime > adjustedBombInterval) {
+            const shootingAliens = this.aliens.filter(alien => 
+                Math.random() < (0.1 + (this.level * 0.02)) // Increased chance with level
+            );
+            shootingAliens.forEach(alien => this.dropBomb(alien));
+            this.lastBombTime = currentTime;
+        }
+
+        // Move bombs
+        this.bombs.forEach((bomb, index) => {
+            bomb.y += bomb.speed;
+
+            // Remove bombs that go off screen
+            if (bomb.y > this.canvas.height) {
+                this.bombs.splice(index, 1);
+            }
+
+            // Check for collision with player
+            if (this.checkCollision(bomb, this.player)) {
+                this.playSound('A2', '0.3'); // Explosion sound
+                this.endGame(false);
+            }
+        });
     }
 
     moveAliens() {
@@ -168,6 +211,9 @@ class Game {
             }
         });
 
+        // Update bombs
+        this.updateBombs();
+
         // Move aliens periodically
         const currentTime = Date.now();
         if (currentTime - this.lastAlienMove > this.alienMoveInterval) {
@@ -188,6 +234,12 @@ class Game {
         this.ctx.fillStyle = '#fff';
         this.bullets.forEach(bullet => {
             this.ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        });
+
+        // Draw bombs
+        this.ctx.fillStyle = '#ff0000';
+        this.bombs.forEach(bomb => {
+            this.ctx.fillRect(bomb.x, bomb.y, bomb.width, bomb.height);
         });
 
         // Draw aliens
@@ -269,6 +321,7 @@ class Game {
             });
         }
     }
+
     gameLoop() {
         this.update();
         this.draw();
