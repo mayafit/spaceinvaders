@@ -54,6 +54,7 @@ class Game {
 
         // Setup sound
         this.synth = new Tone.Synth().toDestination();
+        this.soundEnabled = window.soundEnabled;
 
         // Controls
         this.keys = {
@@ -66,64 +67,9 @@ class Game {
         this.createAliens();
     }
 
-    setupEventListeners() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') this.keys.left = true;
-            if (e.key === 'ArrowRight') this.keys.right = true;
-            if (e.key === ' ') {
-                e.preventDefault();
-                this.keys.space = true;
-                this.shoot();
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft') this.keys.left = false;
-            if (e.key === 'ArrowRight') this.keys.right = false;
-            if (e.key === ' ') this.keys.space = false;
-        });
-    }
-
-    createAliens() {
-        this.aliens = [];
-        const levelConfig = {
-            1: { rows: 3, cols: 8, types: ['normal'], speed: 1 },
-            2: { rows: 4, cols: 8, types: ['normal', 'fast'], speed: 1.2 },
-            3: { rows: 4, cols: 9, types: ['normal', 'fast'], speed: 1.4, boss: true },
-            4: { rows: 5, cols: 9, types: ['normal', 'fast'], speed: 1.6, boss: true },
-            5: { rows: 5, cols: 10, types: ['fast'], speed: 1.8, boss: true }
-        };
-
-        const config = levelConfig[this.level] || levelConfig[5];
-        this.alienMoveInterval = 1000 / config.speed;
-
-        // Create regular aliens
-        for (let row = 0; row < config.rows; row++) {
-            for (let col = 0; col < config.cols; col++) {
-                const type = config.types[Math.floor(Math.random() * config.types.length)];
-                this.aliens.push({
-                    x: col * 50 + 50,
-                    y: row * 50 + 50,
-                    width: type === 'fast' ? 30 : 30,
-                    height: type === 'fast' ? 20 : 30,
-                    type: type,
-                    health: type === 'fast' ? 1 : 1,
-                    speed: type === 'fast' ? 2 : 1
-                });
-            }
-        }
-
-        // Add boss if configured for this level
-        if (config.boss) {
-            this.aliens.push({
-                x: this.canvas.width / 2 - 25,
-                y: 20,
-                width: 50,
-                height: 50,
-                type: 'boss',
-                health: 5,
-                speed: 0.5
-            });
+    playSound(note, duration) {
+        if (this.soundEnabled) {
+            this.synth.triggerAttackRelease(note, duration);
         }
     }
 
@@ -138,7 +84,7 @@ class Game {
         });
 
         // Play shoot sound
-        this.synth.triggerAttackRelease('C4', '0.1');
+        this.playSound('C4', '0.1');
     }
 
     moveAliens() {
@@ -173,12 +119,12 @@ class Game {
                     alien.health--;
                     if (alien.health <= 0) {
                         this.aliens.splice(alienIndex, 1);
-                        this.score += alien.type === 'boss' ? 500 : 
+                        this.score += alien.type === 'boss' ? 500 :
                                     alien.type === 'fast' ? 200 : 100;
                         document.getElementById('score').textContent = this.score;
 
                         // Play explosion sound
-                        this.synth.triggerAttackRelease('G2', '0.1');
+                        this.playSound('G2', '0.1');
                     }
                 }
             });
@@ -263,6 +209,66 @@ class Game {
         loadHighScores();
     }
 
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') this.keys.left = true;
+            if (e.key === 'ArrowRight') this.keys.right = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                this.keys.space = true;
+                this.shoot();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') this.keys.left = false;
+            if (e.key === 'ArrowRight') this.keys.right = false;
+            if (e.key === ' ') this.keys.space = false;
+        });
+    }
+
+    createAliens() {
+        this.aliens = [];
+        const levelConfig = {
+            1: { rows: 3, cols: 8, types: ['normal'], speed: 1 },
+            2: { rows: 4, cols: 8, types: ['normal', 'fast'], speed: 1.2 },
+            3: { rows: 4, cols: 9, types: ['normal', 'fast'], speed: 1.4, boss: true },
+            4: { rows: 5, cols: 9, types: ['normal', 'fast'], speed: 1.6, boss: true },
+            5: { rows: 5, cols: 10, types: ['fast'], speed: 1.8, boss: true }
+        };
+
+        const config = levelConfig[this.level] || levelConfig[5];
+        this.alienMoveInterval = 1000 / config.speed;
+
+        // Create regular aliens
+        for (let row = 0; row < config.rows; row++) {
+            for (let col = 0; col < config.cols; col++) {
+                const type = config.types[Math.floor(Math.random() * config.types.length)];
+                this.aliens.push({
+                    x: col * 50 + 50,
+                    y: row * 50 + 50,
+                    width: type === 'fast' ? 30 : 30,
+                    height: type === 'fast' ? 20 : 30,
+                    type: type,
+                    health: type === 'fast' ? 1 : 1,
+                    speed: type === 'fast' ? 2 : 1
+                });
+            }
+        }
+
+        // Add boss if configured for this level
+        if (config.boss) {
+            this.aliens.push({
+                x: this.canvas.width / 2 - 25,
+                y: 20,
+                width: 50,
+                height: 50,
+                type: 'boss',
+                health: 5,
+                speed: 0.5
+            });
+        }
+    }
     gameLoop() {
         this.update();
         this.draw();
@@ -340,6 +346,26 @@ async function saveScore() {
         await loadHighScores();
     } catch (error) {
         console.error('Error saving score:', error);
+    }
+}
+
+// Add sound toggle functionality
+window.soundEnabled = true;
+
+function toggleSound() {
+    window.soundEnabled = !window.soundEnabled;
+    const soundButton = document.getElementById('soundToggle');
+    if (window.soundEnabled) {
+        soundButton.innerHTML = '🔊 Sound On';
+        soundButton.classList.remove('btn-outline-secondary');
+        soundButton.classList.add('btn-secondary');
+    } else {
+        soundButton.innerHTML = '🔈 Sound Off';
+        soundButton.classList.remove('btn-secondary');
+        soundButton.classList.add('btn-outline-secondary');
+    }
+    if (window.game) {
+        window.game.soundEnabled = window.soundEnabled;
     }
 }
 
