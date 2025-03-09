@@ -5,7 +5,7 @@ from score_handler import get_high_scores, save_score
 
 @app.route('/')
 def index():
-    return render_template('index.html', db_available=True)
+    return render_template('index.html', aliens_per_row=app.config["ALIENS_PER_ROW"])
 
 @app.route('/api/scores', methods=['GET'])
 def get_scores():

@@ -282,22 +282,25 @@ class Game {
     createAliens() {
         this.aliens = [];
         const levelConfig = {
-            1: { rows: 3, cols: 8, types: ['normal'], speed: 1 },
-            2: { rows: 4, cols: 8, types: ['normal', 'fast'], speed: 1.2 },
-            3: { rows: 4, cols: 9, types: ['normal', 'fast'], speed: 1.4, boss: true },
-            4: { rows: 5, cols: 9, types: ['normal', 'fast'], speed: 1.6, boss: true },
-            5: { rows: 5, cols: 10, types: ['fast'], speed: 1.8, boss: true }
+            1: { rows: 3, types: ['normal'], speed: 1 },
+            2: { rows: 4, types: ['normal', 'fast'], speed: 1.2 },
+            3: { rows: 4, types: ['normal', 'fast'], speed: 1.4, boss: true },
+            4: { rows: 5, types: ['normal', 'fast'], speed: 1.6, boss: true },
+            5: { rows: 5, types: ['fast'], speed: 1.8, boss: true }
         };
 
         const config = levelConfig[this.level] || levelConfig[5];
         this.alienMoveInterval = 1000 / config.speed;
 
+        const aliensPerRow = window.gameConfig.aliensPerRow || 8;
+
         // Create regular aliens
         for (let row = 0; row < config.rows; row++) {
-            for (let col = 0; col < config.cols; col++) {
+            for (let col = 0; col < aliensPerRow; col++) {
                 const type = config.types[Math.floor(Math.random() * config.types.length)];
+                const spacing = this.canvas.width / (aliensPerRow + 1);
                 this.aliens.push({
-                    x: col * 50 + 50,
+                    x: col * spacing + spacing,
                     y: row * 50 + 50,
                     width: type === 'fast' ? 30 : 30,
                     height: type === 'fast' ? 20 : 30,

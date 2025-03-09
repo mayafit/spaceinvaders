@@ -67,6 +67,12 @@
             </div>
         </div>
     </div>
+    <script>
+        // Pass game configuration to JavaScript
+        window.gameConfig = {
+            aliensPerRow: {{ aliens_per_row }}
+        };
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>
