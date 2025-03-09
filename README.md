@@ -11,9 +11,12 @@ A dynamic Space Invaders-inspired web game with progressive difficulty, multiple
 - Sound effects with toggle option
 
 ## Requirements
-- Python 3.8+
+- Python 3.8+ (for local setup)
+- Docker (optional, for containerized setup)
 
-## Local Setup
+## Local Setup Options
+
+### Option 1: Direct Installation
 
 1. Create a Python virtual environment:
 ```bash
@@ -30,11 +33,19 @@ pip install flask flask-sqlalchemy email-validator gunicorn
 ```bash
 # Required environment variables
 export SESSION_SECRET="your-secret-key"
+export ALIENS_PER_ROW=8
 ```
 
 4. Run the application:
 ```bash
 python main.py
+```
+
+### Option 2: Docker Setup
+
+1. Build and run using Docker Compose:
+```bash
+docker-compose up --build
 ```
 
 The game will be available at http://localhost:5000

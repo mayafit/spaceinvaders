@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - SESSION_SECRET=dev_key
+      - ALIENS_PER_ROW=8
+    command: gunicorn --bind 0.0.0.0:5000 --reload main:app

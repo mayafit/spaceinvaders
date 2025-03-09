@@ -175,11 +175,14 @@ class Game {
 
         // Check if level is complete
         if (this.aliens.length === 0) {
+            console.log(`Level complete - Current level: ${this.level}`);
             if (this.level < 5) {
                 this.level++;
+                console.log(`Advancing to level: ${this.level}`);
                 document.getElementById('level').textContent = this.level;
                 this.showLevelTransition();
             } else {
+                console.log('Game completed - all levels finished');
                 this.endGame(true);
             }
         }
@@ -280,6 +283,7 @@ class Game {
     }
 
     createAliens() {
+        console.log(`Creating aliens for level ${this.level}`);
         this.aliens = [];
         const levelConfig = {
             1: { rows: 3, types: ['normal'], speed: 1 },
@@ -293,6 +297,7 @@ class Game {
         this.alienMoveInterval = 1000 / config.speed;
 
         const aliensPerRow = window.gameConfig.aliensPerRow || 8;
+        console.log(`Aliens per row: ${aliensPerRow}`);
 
         // Create regular aliens
         for (let row = 0; row < config.rows; row++) {
@@ -323,6 +328,8 @@ class Game {
                 speed: 0.5
             });
         }
+
+        console.log(`Total aliens created: ${this.aliens.length}`);
     }
 
     gameLoop() {
@@ -332,6 +339,7 @@ class Game {
     }
 
     showLevelTransition() {
+        console.log(`Starting level transition for level ${this.level}`);
         this.transitionCanvas = document.createElement('canvas');
         this.transitionCanvas.width = this.canvas.width;
         this.transitionCanvas.height = this.canvas.height;
@@ -354,12 +362,15 @@ class Game {
 
         const animate = () => {
             if (frame >= maxFrames) {
+                console.log(`Level transition complete for level ${this.level}`);
                 this.transitionCanvas.remove();
                 if (!this.gameStarted) {
+                    console.log('First game start - initializing game loop');
                     this.gameStarted = true;
                     this.createAliens();
                     this.gameLoop();
                 } else {
+                    console.log('Creating aliens for next level');
                     this.createAliens();
                 }
                 return;
