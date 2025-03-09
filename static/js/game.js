@@ -368,13 +368,6 @@ function startGame() {
 
 async function loadHighScores() {
     try {
-        if (!window.dbAvailable) {
-            // In offline mode
-            const highScoresList = document.getElementById('highScores');
-            highScoresList.innerHTML = '<li class="list-group-item">Offline mode - High scores unavailable</li>';
-            return;
-        }
-
         const response = await fetch('/api/scores');
         if (!response.ok) {
             throw new Error('Failed to load high scores');
@@ -435,8 +428,7 @@ async function saveScore() {
 }
 
 // Add sound toggle functionality
-window.soundEnabled = true;
-window.dbAvailable = true; // Initialize database availability flag
+window.soundEnabled = true;ag
 
 function toggleSound() {
     window.soundEnabled = !window.soundEnabled;
