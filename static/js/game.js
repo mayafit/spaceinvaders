@@ -6,6 +6,7 @@ class Game {
         this.level = 1;
         this.gameOver = false;
         this.shipType = shipType;
+        this.gameStarted = false;  // New flag to track if game has started
 
         // Ship characteristics
         const shipStats = {
@@ -24,14 +25,14 @@ class Game {
         };
 
         this.bullets = [];
-        this.bombs = [];  // Array to store enemy bombs
+        this.bombs = [];
         this.aliens = [];
         this.alienDirection = 1;
         this.alienStepDown = 30;
         this.alienMoveInterval = 1000;
         this.lastAlienMove = 0;
         this.lastBombTime = 0;
-        this.bombInterval = 2000; // Base interval between bomb drops
+        this.bombInterval = 2000;
 
         // Load images
         this.playerImg = new Image();
@@ -67,7 +68,6 @@ class Game {
         };
 
         this.setupEventListeners();
-        this.createAliens();
     }
 
     playSound(note, duration) {
@@ -352,7 +352,13 @@ class Game {
         const animate = () => {
             if (frame >= maxFrames) {
                 this.transitionCanvas.remove();
-                this.createAliens();
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                    this.createAliens();
+                    this.gameLoop();
+                } else {
+                    this.createAliens();
+                }
                 return;
             }
 
@@ -432,10 +438,10 @@ function startGame() {
     document.getElementById('gameOver').classList.add('d-none');
     document.getElementById('gameCanvas').classList.remove('d-none');
     document.getElementById('score').textContent = '0';
-    document.getElementById('level').textContent = '1'; //Added to initialize level display
+    document.getElementById('level').textContent = '1';
 
     window.game = new Game(selectedShip);
-    window.game.gameLoop();
+    window.game.showLevelTransition(); // Show level transition before starting the game
 }
 
 async function loadHighScores() {
