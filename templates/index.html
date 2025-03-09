@@ -61,9 +61,6 @@
                         <div class="card-body">
                             <ul id="highScores" class="list-group list-group-flush">
                             </ul>
-                            <div class="alert alert-warning mt-3">
-                                Database connection unavailable. Game is running in offline mode. Scores will not be saved.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -71,10 +68,6 @@
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <script>
-        // Pass database availability status to JavaScript
-        window.dbAvailable = {{ 'true' if db_available else 'false' }};
-    </script>
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>
 </html>
