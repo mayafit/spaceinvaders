@@ -178,7 +178,7 @@ class Game {
             if (this.level < 5) {
                 this.level++;
                 document.getElementById('level').textContent = this.level;
-                this.createAliens();
+                this.showLevelTransition(); // Add level transition here
             } else {
                 this.endGame(true);
             }
@@ -327,6 +327,78 @@ class Game {
         this.draw();
         requestAnimationFrame(() => this.gameLoop());
     }
+
+    showLevelTransition() {
+        this.transitionCanvas = document.createElement('canvas');
+        this.transitionCanvas.width = this.canvas.width;
+        this.transitionCanvas.height = this.canvas.height;
+        this.transitionCanvas.style.position = 'absolute';
+        this.transitionCanvas.style.left = this.canvas.offsetLeft + 'px';
+        this.transitionCanvas.style.top = this.canvas.offsetTop + 'px';
+        this.canvas.parentNode.appendChild(this.transitionCanvas);
+
+        const ctx = this.transitionCanvas.getContext('2d');
+
+        // Stars data
+        const stars = Array(100).fill().map(() => ({
+            x: Math.random() * this.canvas.width,
+            y: Math.random() * this.canvas.height,
+            z: Math.random() * 1500
+        }));
+
+        let frame = 0;
+        const maxFrames = 120; // 2 seconds at 60fps
+
+        const animate = () => {
+            if (frame >= maxFrames) {
+                this.transitionCanvas.remove();
+                this.createAliens();
+                return;
+            }
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+            // Animate stars
+            stars.forEach(star => {
+                star.z -= 10;
+                if (star.z < 1) star.z = 1500;
+
+                const x = (star.x - this.canvas.width/2) * (800/star.z) + this.canvas.width/2;
+                const y = (star.y - this.canvas.height/2) * (800/star.z) + this.canvas.height/2;
+                const size = (1 - star.z/1500) * 3;
+
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw level text with 3D effect
+            const progress = frame / maxFrames;
+            const scale = 6 * (1 - progress) + 0.1; // Text gets larger as it approaches
+            const alpha = progress < 0.8 ? 1 : 1 - ((progress - 0.8) * 5); // Fade out at the end
+
+            ctx.save();
+            ctx.translate(this.canvas.width/2, this.canvas.height/2);
+            ctx.scale(scale, scale);
+
+            // 3D effect layers
+            for (let i = 5; i >= 0; i--) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * (i/5)})`;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`LEVEL ${this.level}`, i, i);
+            }
+
+            ctx.restore();
+
+            frame++;
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+    }
 }
 
 let selectedShip = null;
@@ -428,7 +500,7 @@ async function saveScore() {
 }
 
 // Add sound toggle functionality
-window.soundEnabled = true;ag
+window.soundEnabled = true;
 
 function toggleSound() {
     window.soundEnabled = !window.soundEnabled;
