@@ -6,7 +6,8 @@ class Game {
         this.level = 1;
         this.gameOver = false;
         this.shipType = shipType;
-        this.gameStarted = false;  // New flag to track if game has started
+        this.gameStarted = false;
+        this.inTransition = false;  // New flag to track transition state
 
         // Ship characteristics
         const shipStats = {
@@ -154,6 +155,8 @@ class Game {
     }
 
     checkCollisions() {
+        if (this.inTransition) return; // Skip collision checks during transition
+
         this.bullets.forEach((bullet, bulletIndex) => {
             this.aliens.forEach((alien, alienIndex) => {
                 if (this.checkCollision(bullet, alien)) {
@@ -166,7 +169,6 @@ class Game {
                             alien.type === 'fast' ? 200 : 100;
                         document.getElementById('score').textContent = this.score;
 
-                        // Play explosion sound
                         this.playSound('G2', '0.1');
                     }
                 }
@@ -174,12 +176,13 @@ class Game {
         });
 
         // Check if level is complete
-        if (this.aliens.length === 0) {
+        if (!this.inTransition && this.aliens.length === 0) {
             console.log(`Level complete - Current level: ${this.level}`);
             if (this.level < 5) {
                 this.level++;
                 console.log(`Advancing to level: ${this.level}`);
                 document.getElementById('level').textContent = this.level;
+                this.inTransition = true;  // Set transition flag
                 this.showLevelTransition();
             } else {
                 console.log('Game completed - all levels finished');
@@ -373,6 +376,7 @@ class Game {
                     console.log('Creating aliens for next level');
                     this.createAliens();
                 }
+                this.inTransition = false;  // Clear transition flag
                 return;
             }
 
@@ -396,14 +400,13 @@ class Game {
 
             // Draw level text with 3D effect
             const progress = frame / maxFrames;
-            const scale = 6 * (1 - progress) + 0.1; // Text gets larger as it approaches
-            const alpha = progress < 0.8 ? 1 : 1 - ((progress - 0.8) * 5); // Fade out at the end
+            const scale = 6 * (1 - progress) + 0.1;
+            const alpha = progress < 0.8 ? 1 : 1 - ((progress - 0.8) * 5);
 
             ctx.save();
             ctx.translate(this.canvas.width/2, this.canvas.height/2);
             ctx.scale(scale, scale);
 
-            // 3D effect layers
             for (let i = 5; i >= 0; i--) {
                 ctx.fillStyle = `rgba(255, 255, 255, ${alpha * (i/5)})`;
                 ctx.font = 'bold 20px Arial';
