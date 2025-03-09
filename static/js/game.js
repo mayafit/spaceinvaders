@@ -178,7 +178,7 @@ class Game {
             if (this.level < 5) {
                 this.level++;
                 document.getElementById('level').textContent = this.level;
-                this.showLevelTransition(); // Add level transition here
+                this.showLevelTransition();
             } else {
                 this.endGame(true);
             }
